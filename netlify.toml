@@ -2,6 +2,10 @@
   command = "npm run build"
   publish = ".next"
 
+[build.environment]
+  SECRETS_SCAN_OMIT_KEYS = "RESEND_FROM_EMAIL,NEXT_PUBLIC_GITHUB_REDIRECT_URI"
+
+
 # Netlify Essential Next.js Plugin is automatically installed on build,
 # but we can declare it here to ensure proper App Router handling.
 [[plugins]]

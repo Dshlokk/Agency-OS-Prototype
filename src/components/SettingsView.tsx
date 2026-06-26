@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 
 export default function SettingsView() {
-  const [activeSettingsTab, setActiveSettingsTab] = useState<'billing' | 'integrations' | 'database'>('database');
+  const [activeSettingsTab, setActiveSettingsTab] = useState<'billing' | 'integrations' | 'database' | 'agencyProfile'>('database');
   
   // Settings Inputs
   const [dbConfig, setDbConfig] = useState({
@@ -23,6 +23,43 @@ export default function SettingsView() {
   });
   const [isValidating, setIsValidating] = useState<boolean>(false);
   const [validationSuccess, setValidationSuccess] = useState<boolean | null>(null);
+
+  // Agency Profile / Contract Inputs
+  const [agencyProfile, setAgencyProfile] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('agencyos_owner_profile');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+    return {
+      companyName: 'AgencyOS AI',
+      ownerName: 'Emma Stone',
+      designation: 'Founder & CEO',
+      address: '100 Innovation Way, Suite 400, San Francisco, CA 94105',
+      email: 'emma@agencyos.ai',
+      phone: '+1 (555) 839-2019',
+      country: 'United States',
+      stateProvince: 'California',
+      includedRevisions: '3',
+      extraRevisionFee: '$50',
+      paymentTermsDays: '15'
+    };
+  });
+  const [profileSaveSuccess, setProfileSaveSuccess] = useState<boolean>(false);
+
+  const handleSaveProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('agencyos_owner_profile', JSON.stringify(agencyProfile));
+      setProfileSaveSuccess(true);
+      setTimeout(() => setProfileSaveSuccess(false), 2000);
+    }
+  };
 
   // Integrations states
   const [integrations, setIntegrations] = useState({
@@ -63,7 +100,8 @@ export default function SettingsView() {
           {[
             { id: 'database', label: 'Database & API keys', icon: Database },
             { id: 'integrations', label: 'Connected Apps', icon: Link },
-            { id: 'billing', label: 'Subscription Plan', icon: CreditCard }
+            { id: 'billing', label: 'Subscription Plan', icon: CreditCard },
+            { id: 'agencyProfile', label: 'Agency Profile & Contract', icon: Globe }
           ].map(tab => {
             const Icon = tab.icon;
             return (
@@ -269,6 +307,163 @@ export default function SettingsView() {
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* AGENCY PROFILE / CONTRACT SETTINGS */}
+            {activeSettingsTab === 'agencyProfile' && (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-xs font-bold text-zinc-800 uppercase tracking-wider">Agency Profile & Contract Defaults</h3>
+                  <p className="text-[10px] text-zinc-500 mt-1">Configure your company identity, contact details, and terms to populate client contracts dynamically.</p>
+                </div>
+
+                <form onSubmit={handleSaveProfile} className="space-y-4 max-w-xl">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider block">Company Name</label>
+                      <input
+                        type="text"
+                        required
+                        value={agencyProfile.companyName}
+                        onChange={(e) => setAgencyProfile({ ...agencyProfile, companyName: e.target.value })}
+                        className="w-full text-xs"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider block">Authorized Representative</label>
+                      <input
+                        type="text"
+                        required
+                        value={agencyProfile.ownerName}
+                        onChange={(e) => setAgencyProfile({ ...agencyProfile, ownerName: e.target.value })}
+                        className="w-full text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider block">Designation / Title</label>
+                      <input
+                        type="text"
+                        required
+                        value={agencyProfile.designation}
+                        onChange={(e) => setAgencyProfile({ ...agencyProfile, designation: e.target.value })}
+                        placeholder="e.g. Founder & CEO"
+                        className="w-full text-xs"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider block">Email Address</label>
+                      <input
+                        type="email"
+                        required
+                        value={agencyProfile.email}
+                        onChange={(e) => setAgencyProfile({ ...agencyProfile, email: e.target.value })}
+                        className="w-full text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider block">Phone Number</label>
+                      <input
+                        type="text"
+                        required
+                        value={agencyProfile.phone}
+                        onChange={(e) => setAgencyProfile({ ...agencyProfile, phone: e.target.value })}
+                        className="w-full text-xs"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider block">Payment Terms (Days)</label>
+                      <input
+                        type="text"
+                        required
+                        value={agencyProfile.paymentTermsDays}
+                        onChange={(e) => setAgencyProfile({ ...agencyProfile, paymentTermsDays: e.target.value })}
+                        placeholder="e.g. 15"
+                        className="w-full text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider block">Office Address</label>
+                    <input
+                      type="text"
+                      required
+                      value={agencyProfile.address}
+                      onChange={(e) => setAgencyProfile({ ...agencyProfile, address: e.target.value })}
+                      className="w-full text-xs"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider block">Governing Country</label>
+                      <input
+                        type="text"
+                        required
+                        value={agencyProfile.country}
+                        onChange={(e) => setAgencyProfile({ ...agencyProfile, country: e.target.value })}
+                        className="w-full text-xs"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider block">Governing State / Province</label>
+                      <input
+                        type="text"
+                        required
+                        value={agencyProfile.stateProvince}
+                        onChange={(e) => setAgencyProfile({ ...agencyProfile, stateProvince: e.target.value })}
+                        className="w-full text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider block">Included Revisions</label>
+                      <input
+                        type="text"
+                        required
+                        value={agencyProfile.includedRevisions}
+                        onChange={(e) => setAgencyProfile({ ...agencyProfile, includedRevisions: e.target.value })}
+                        placeholder="e.g. 3"
+                        className="w-full text-xs"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider block">Extra Revision Rate</label>
+                      <input
+                        type="text"
+                        required
+                        value={agencyProfile.extraRevisionFee}
+                        onChange={(e) => setAgencyProfile({ ...agencyProfile, extraRevisionFee: e.target.value })}
+                        placeholder="e.g. $50"
+                        className="w-full text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 pt-2">
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-zinc-950 hover:bg-zinc-800 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow"
+                    >
+                      Save Agency Details
+                    </button>
+
+                    {profileSaveSuccess && (
+                      <span className="text-xs text-emerald-600 flex items-center gap-1.5 font-semibold">
+                        <Check className="w-4 h-4 text-emerald-500" /> Settings updated successfully!
+                      </span>
+                    )}
+                  </div>
+                </form>
               </div>
             )}
 

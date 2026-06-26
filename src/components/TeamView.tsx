@@ -25,29 +25,30 @@ export default function TeamView({ refreshTrigger }: TeamViewProps) {
     loadTeam();
   }, [refreshTrigger]);
 
-  const mockMeetings = [
-    {
-      id: 'm1',
-      title: 'Weekly Alignment & Campaign Sync',
-      date: 'June 24, 2026',
-      summary: 'Discussed launching comparative content hubs for Quantum Tech. Verified Core Web Vitals script blockage. Liam Neeson will optimize asset scripts and payload overhead. Sophia Loren will finalize target developer queries.',
-      actionItems: [
-        'Liam: Compress heavy JS script bundles and test speed updates.',
-        'Sophia: Finalize developer search queries listing.',
-        'Emma: Coordinate next sync meeting.'
-      ]
-    },
-    {
-      id: 'm2',
-      title: 'Paid Ads Performance briefing',
-      date: 'June 20, 2026',
-      summary: 'Reviewed Zenith Apparel Meta ad performance parameters. High purchase rate from environmentally friendly shipping video assets. Scaled target campaign budgets by 20%.',
-      actionItems: [
-        'Sophia: Deploy Cart Abandonment flow setup.',
-        'Emma: Monitor lookalike target ad configurations.'
-      ]
+  const mockMeetings: { id: string; title: string; date: string; summary: string; actionItems: string[] }[] = [];
+
+  const getResourceAuditText = () => {
+    if (team.length === 0) {
+      return "No team members configured yet.";
     }
-  ];
+    const sorted = [...team].sort((a, b) => (b.resourceUtilization || 0) - (a.resourceUtilization || 0));
+    const highest = sorted[0];
+    const lowest = sorted[sorted.length - 1];
+    
+    if (highest && lowest && highest !== lowest && (highest.resourceUtilization || 0) > 80) {
+      return `${highest.name} has an active workload of ${highest.resourceUtilization}%. ${lowest.name} has a capacity of ${lowest.resourceUtilization}%. Reallocating new tasks to ${lowest.name.split(' ')[0]} will keep projects on timeline.`;
+    }
+    
+    return "Team workloads are currently balanced. Total capacity is stable.";
+  };
+
+  const getProductivityVelocityText = () => {
+    if (team.length === 0) {
+      return "Velocity tracking will begin once tasks are assigned and completed.";
+    }
+    const avgProductivity = Math.round(team.reduce((acc, curr) => acc + (curr.productivityScore || 0), 0) / team.length);
+    return `Team productivity maintains a steady ${avgProductivity}%, reflecting optimized task completion velocities.`;
+  };
 
   return (
     <div className="space-y-6 pb-12">
@@ -105,41 +106,47 @@ export default function TeamView({ refreshTrigger }: TeamViewProps) {
           <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-wider block">AI Meeting Transcripts</span>
           
           <div className="space-y-4">
-            {mockMeetings.map(meet => (
-              <div key={meet.id} className="p-5 bg-white border border-zinc-200 rounded-xl space-y-4 shadow-2xs">
-                <div className="flex justify-between items-start border-b border-zinc-100 pb-3">
-                  <div>
-                    <h4 className="text-xs font-bold text-zinc-800">{meet.title}</h4>
-                    <span className="text-[9px] text-zinc-400 flex items-center gap-1 mt-0.5 font-medium">
-                      <Calendar className="w-3.5 h-3.5" />
-                      {meet.date}
+            {mockMeetings.length === 0 ? (
+              <div className="p-8 text-center bg-white border border-zinc-200 rounded-xl shadow-2xs">
+                <p className="text-xs text-zinc-500 font-normal">No meeting transcripts logged yet.</p>
+              </div>
+            ) : (
+              mockMeetings.map(meet => (
+                <div key={meet.id} className="p-5 bg-white border border-zinc-200 rounded-xl space-y-4 shadow-2xs">
+                  <div className="flex justify-between items-start border-b border-zinc-100 pb-3">
+                    <div>
+                      <h4 className="text-xs font-bold text-zinc-800">{meet.title}</h4>
+                      <span className="text-[9px] text-zinc-400 flex items-center gap-1 mt-0.5 font-medium">
+                        <Calendar className="w-3.5 h-3.5" />
+                        {meet.date}
+                      </span>
+                    </div>
+                    <span className="text-[9px] bg-zinc-100 border border-zinc-200 text-zinc-600 font-bold px-2 py-0.5 rounded uppercase tracking-wider">
+                      AI Summary
                     </span>
                   </div>
-                  <span className="text-[9px] bg-zinc-100 border border-zinc-200 text-zinc-600 font-bold px-2 py-0.5 rounded uppercase tracking-wider">
-                    AI Summary
-                  </span>
-                </div>
 
-                <div className="space-y-3">
-                  <div className="space-y-1 text-xs">
-                    <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-wider block">Brief Transcript Summary</span>
-                    <p className="text-zinc-650 leading-relaxed">{meet.summary}</p>
-                  </div>
+                  <div className="space-y-3">
+                    <div className="space-y-1 text-xs">
+                      <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-wider block">Brief Transcript Summary</span>
+                      <p className="text-zinc-600 leading-relaxed">{meet.summary}</p>
+                    </div>
 
-                  <div className="space-y-1.5 text-xs">
-                    <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-wider block">Assigned Actions</span>
-                    <div className="space-y-1">
-                      {meet.actionItems.map(item => (
-                        <div key={item} className="flex items-start gap-2 text-zinc-700 leading-normal">
-                          <CheckCircle2 className="w-4 h-4 text-zinc-450 shrink-0 mt-0.5" />
-                          <span>{item}</span>
-                        </div>
-                      ))}
+                    <div className="space-y-1.5 text-xs">
+                      <span className="text-[9px] text-zinc-400 font-bold uppercase tracking-wider block">Assigned Actions</span>
+                      <div className="space-y-1">
+                        {meet.actionItems.map(item => (
+                          <div key={item} className="flex items-start gap-2 text-zinc-700 leading-normal">
+                            <CheckCircle2 className="w-4 h-4 text-zinc-450 shrink-0 mt-0.5" />
+                            <span>{item}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
@@ -157,14 +164,14 @@ export default function TeamView({ refreshTrigger }: TeamViewProps) {
               <div className="space-y-1">
                 <strong className="text-zinc-850 block">Workload Balance Warning</strong>
                 <p className="text-zinc-600">
-                  **Liam Neeson** has an active workload of **90%**. Sophia Loren has a capacity of **72%**. Reallocating new campaign tasks to Sophia will keep projects on timeline.
+                  {getResourceAuditText()}
                 </p>
               </div>
 
               <div className="space-y-1 pt-3.5 border-t border-zinc-200">
                 <strong className="text-zinc-850 block">Productivity Velocity</strong>
                 <p className="text-zinc-600">
-                  Team productivity maintains a steady **91%**, showing an increase following optimized comparison layout workflows.
+                  {getProductivityVelocityText()}
                 </p>
               </div>
             </div>

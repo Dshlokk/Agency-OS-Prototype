@@ -216,3 +216,30 @@ export interface AIConversation {
   messages: Message[];
   createdAt: string;
 }
+
+export interface InvoiceItem {
+  id: string;
+  description: string;
+  quantity: number;
+  rate: number;
+  amount: number;
+}
+
+export interface Invoice {
+  id: string;
+  clientId: string;
+  clientName: string;
+  invoiceNumber: string;
+  issueDate: string;
+  dueDate: string;
+  items: InvoiceItem[];
+  subtotal: number;
+  taxRate: number;
+  taxAmount: number;
+  total: number;
+  status: 'draft' | 'sent' | 'paid' | 'overdue';
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+

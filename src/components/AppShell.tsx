@@ -44,17 +44,65 @@ export default function AppShell() {
 
   // Authentication State
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [currentUser, setCurrentUser] = useState<{ name: string; email: string; avatar: string; role: string }>({
+    name: 'Emma Stone',
+    email: 'emma@agencyos.ai',
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
+    role: 'Owner'
+  });
   const [loginEmail, setLoginEmail] = useState<string>('emma@agencyos.ai');
   const [loginPassword, setLoginPassword] = useState<string>('password');
   const [loginError, setLoginError] = useState<string>('');
 
+  // Registration Flow State
+  const [loginView, setLoginView] = useState<'login' | 'plans' | 'register'>('login');
+  const [selectedPlan, setSelectedPlan] = useState<{ name: string; price: string; features: string[] } | null>(null);
+  const [registerName, setRegisterName] = useState<string>('');
+  const [registerEmail, setRegisterEmail] = useState<string>('');
+  const [registerPassword, setRegisterPassword] = useState<string>('');
+
   // Check login session on load
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const session = localStorage.getItem('agencyos_session');
-      if (session === 'authenticated') {
-        setIsAuthenticated(true);
-      }
+      // Check cookies session first by calling API
+      fetch('/api/auth/session')
+        .then(res => {
+          if (res.ok) return res.json();
+          throw new Error('No cookie session');
+        })
+        .then(data => {
+          if (data.authenticated && data.user) {
+            setIsAuthenticated(true);
+            setCurrentUser({
+              name: data.user.name || 'User',
+              email: data.user.email || '',
+              avatar: data.user.avatar || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
+              role: data.user.role || 'Owner'
+            });
+            localStorage.setItem('agencyos_session', 'authenticated');
+            localStorage.setItem('agencyos_user', JSON.stringify({
+              name: data.user.name,
+              email: data.user.email,
+              avatar: data.user.avatar,
+              role: data.user.role
+            }));
+          }
+        })
+        .catch(() => {
+          // Fallback to legacy local storage sandbox session
+          const session = localStorage.getItem('agencyos_session');
+          if (session === 'authenticated') {
+            setIsAuthenticated(true);
+            const userJson = localStorage.getItem('agencyos_user');
+            if (userJson) {
+              try {
+                setCurrentUser(JSON.parse(userJson));
+              } catch (e) {
+                console.error(e);
+              }
+            }
+          }
+        });
     }
   }, []);
 
@@ -82,8 +130,16 @@ export default function AppShell() {
     if (loginEmail === 'emma@agencyos.ai' && loginPassword === 'password') {
       setIsAuthenticated(true);
       setLoginError('');
+      const defaultUser = {
+        name: 'Emma Stone',
+        email: 'emma@agencyos.ai',
+        avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
+        role: 'Owner'
+      };
+      setCurrentUser(defaultUser);
       if (typeof window !== 'undefined') {
         localStorage.setItem('agencyos_session', 'authenticated');
+        localStorage.setItem('agencyos_user', JSON.stringify(defaultUser));
       }
       triggerRefresh();
     } else {
@@ -91,10 +147,22 @@ export default function AppShell() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setIsAuthenticated(false);
+    setCurrentUser({
+      name: 'Emma Stone',
+      email: 'emma@agencyos.ai',
+      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
+      role: 'Owner'
+    });
     if (typeof window !== 'undefined') {
       localStorage.removeItem('agencyos_session');
+      localStorage.removeItem('agencyos_user');
+    }
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (e) {
+      console.error('Failed to log out via API:', e);
     }
   };
 
@@ -159,8 +227,220 @@ export default function AppShell() {
     { id: 'settings', name: 'Settings', icon: Settings }
   ];
 
-  // RENDER LOGIN SCREEN
+  // RENDER AUTHENTICATION FLOW
   if (!isAuthenticated) {
+    if (loginView === 'plans') {
+      return (
+        <div className="min-h-screen bg-zinc-50 flex flex-col items-center justify-center p-6 md:p-12">
+          <div className="max-w-4xl w-full space-y-8">
+            <div className="text-center space-y-2">
+              <div className="inline-flex w-10 h-10 rounded-lg bg-zinc-900 items-center justify-center shadow-xs mb-2">
+                <Sparkles className="w-5 h-5 text-white" />
+              </div>
+              <h1 className="text-2xl font-bold text-zinc-900 tracking-tight">Choose Your AgencyOS Plan</h1>
+              <p className="text-sm text-zinc-400 max-w-md mx-auto">Select a subscription plan to unlock full dashboard access and client analytics.</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                {
+                  name: 'Starter',
+                  price: '$49',
+                  desc: 'Perfect for freelance marketers and small campaigns.',
+                  features: ['3 Active Clients', 'Basic PDF Exports', 'Standard Social Audits', 'Core CRM Pipeline'],
+                  popular: false
+                },
+                {
+                  name: 'Growth',
+                  price: '$99',
+                  desc: 'Our most popular plan for scaling agencies.',
+                  features: ['Unlimited Clients', 'Full Presentation Decks', 'Real-Time Social Analytics', 'AI Copilot Drawer', 'Team Collaboration'],
+                  popular: true
+                },
+                {
+                  name: 'Enterprise',
+                  price: '$249',
+                  desc: 'Custom workflows for high-volume enterprise teams.',
+                  features: ['White-label Pitch Decks', 'Custom Webhooks Integration', 'Database API Sync', 'Dedicated Audit Manager', '24/7 Priority Support'],
+                  popular: false
+                }
+              ].map(plan => (
+                <div 
+                  key={plan.name}
+                  className={`bg-white border rounded-xl p-6 shadow-xs flex flex-col justify-between relative transition-all duration-200 hover:shadow-md ${
+                    plan.popular ? 'border-zinc-900 ring-2 ring-zinc-900/5' : 'border-zinc-200'
+                  }`}
+                >
+                  {plan.popular && (
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-zinc-900 text-white text-[9px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
+                      Most Popular
+                    </span>
+                  )}
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="font-bold text-md text-zinc-900">{plan.name}</h3>
+                      <p className="text-[11px] text-zinc-400 mt-1">{plan.desc}</p>
+                    </div>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-3xl font-extrabold text-zinc-900">{plan.price}</span>
+                      <span className="text-xs text-zinc-400">/ month</span>
+                    </div>
+                    <ul className="space-y-2 pt-2 border-t border-zinc-100">
+                      {plan.features.map(f => (
+                        <li key={f} className="flex items-center gap-2 text-xs text-zinc-600">
+                          <svg className="w-3.5 h-3.5 text-zinc-900 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span>{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setSelectedPlan(plan);
+                      setLoginView('register');
+                      if (typeof document !== 'undefined') {
+                        document.cookie = `agencyos_pending_plan=${plan.name}; path=/; max-age=600`;
+                      }
+                    }}
+                    className={`w-full py-2 mt-6 rounded-lg text-xs font-semibold shadow-xs transition-colors ${
+                      plan.popular 
+                        ? 'bg-zinc-950 hover:bg-zinc-800 text-white' 
+                        : 'bg-zinc-100 hover:bg-zinc-200 text-zinc-800 border border-zinc-200'
+                    }`}
+                  >
+                    Choose {plan.name}
+                  </button>
+                </div>
+              ))}
+            </div>
+            
+            <div className="text-center">
+              <button 
+                onClick={() => setLoginView('login')}
+                className="text-xs text-zinc-400 hover:text-zinc-900 font-medium hover:underline"
+              >
+                Back to Sign In
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    if (loginView === 'register') {
+      return (
+        <div className="min-h-screen bg-zinc-50 flex items-center justify-center p-4">
+          <div className="w-full max-w-sm bg-white border border-zinc-200 rounded-xl p-6 shadow-sm space-y-6">
+            <div className="flex flex-col items-center text-center space-y-2">
+              <div className="w-10 h-10 rounded-lg bg-zinc-900 flex items-center justify-center shadow-xs">
+                <Sparkles className="w-5 h-5 text-white" />
+              </div>
+              <h1 className="text-md font-bold text-zinc-900 tracking-tight">Create AgencyOS Account</h1>
+              {selectedPlan && (
+                <div className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-zinc-50 border border-zinc-200 rounded-full text-[10px] text-zinc-600 font-semibold">
+                  <span>Selected: <strong>{selectedPlan.name} Plan</strong> ({selectedPlan.price})</span>
+                  <button onClick={() => setLoginView('plans')} className="text-zinc-400 hover:text-zinc-950 font-bold underline ml-1">Change</button>
+                </div>
+              )}
+            </div>
+
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!registerName || !registerEmail || !registerPassword) return;
+                const newUser = {
+                  name: registerName,
+                  email: registerEmail,
+                  avatar: `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(registerName)}`,
+                  role: selectedPlan ? `${selectedPlan.name} Plan` : 'Starter Plan'
+                };
+                setIsAuthenticated(true);
+                setCurrentUser(newUser);
+                if (typeof window !== 'undefined') {
+                  localStorage.setItem('agencyos_session', 'authenticated');
+                  localStorage.setItem('agencyos_user', JSON.stringify(newUser));
+                }
+                triggerRefresh();
+              }}
+              className="space-y-4"
+            >
+              <div className="space-y-1">
+                <label className="text-[9px] text-zinc-400 font-bold uppercase tracking-wider block">Full Name</label>
+                <input
+                  type="text"
+                  required
+                  value={registerName}
+                  onChange={(e) => setRegisterName(e.target.value)}
+                  className="w-full pl-3 pr-3"
+                  placeholder="Emma Stone"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[9px] text-zinc-400 font-bold uppercase tracking-wider block">Email Address</label>
+                <input
+                  type="email"
+                  required
+                  value={registerEmail}
+                  onChange={(e) => setRegisterEmail(e.target.value)}
+                  className="w-full pl-3 pr-3"
+                  placeholder="emma@agencyos.ai"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[9px] text-zinc-400 font-bold uppercase tracking-wider block">Password</label>
+                <input
+                  type="password"
+                  required
+                  value={registerPassword}
+                  onChange={(e) => setRegisterPassword(e.target.value)}
+                  className="w-full pl-3 pr-3"
+                  placeholder="••••••••"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-2 bg-zinc-950 hover:bg-zinc-800 text-white rounded-lg text-xs font-semibold shadow transition-colors"
+              >
+                Register & Start Trial
+              </button>
+            </form>
+
+            <div className="relative flex py-1 items-center text-zinc-400">
+              <div className="flex-grow border-t border-zinc-200"></div>
+              <span className="flex-shrink mx-4 text-[9px] font-bold uppercase tracking-wider">or sign up with</span>
+              <div className="flex-grow border-t border-zinc-200"></div>
+            </div>
+
+            <a
+              href="/api/auth/github/login"
+              className="w-full flex items-center justify-center gap-2 py-2 px-4 border border-zinc-200 hover:border-zinc-950 bg-white hover:bg-zinc-50 text-zinc-800 hover:text-zinc-950 rounded-lg text-xs font-semibold shadow-xs transition-all duration-200 group relative overflow-hidden"
+            >
+              <svg className="w-4 h-4 transition-transform group-hover:scale-110" viewBox="0 0 24 24" fill="currentColor">
+                <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0012 2z" />
+              </svg>
+              <span>Sign up with GitHub</span>
+              <span className="absolute inset-0 w-full h-full bg-zinc-950/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+            </a>
+
+            <div className="text-center pt-2 border-t border-zinc-100">
+              <button 
+                onClick={() => setLoginView('login')}
+                className="text-[9px] text-zinc-400 hover:text-zinc-900 font-semibold"
+              >
+                Already have an account? Sign In
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Default Login View
     return (
       <div className="min-h-screen bg-zinc-50 flex items-center justify-center p-4">
         <div className="w-full max-w-sm bg-white border border-zinc-200 rounded-xl p-6 shadow-sm space-y-6">
@@ -217,7 +497,30 @@ export default function AppShell() {
             </button>
           </form>
 
-          <div className="text-center pt-2 border-t border-zinc-100">
+          <div className="relative flex py-2 items-center text-zinc-400">
+            <div className="flex-grow border-t border-zinc-200"></div>
+            <span className="flex-shrink mx-4 text-[9px] font-bold uppercase tracking-wider">or continue with</span>
+            <div className="flex-grow border-t border-zinc-200"></div>
+          </div>
+
+          <a
+            href="/api/auth/github/login"
+            className="w-full flex items-center justify-center gap-2 py-2 px-4 border border-zinc-200 hover:border-zinc-950 bg-white hover:bg-zinc-50 text-zinc-800 hover:text-zinc-950 rounded-lg text-xs font-semibold shadow-xs transition-all duration-200 group relative overflow-hidden"
+          >
+            <svg className="w-4 h-4 transition-transform group-hover:scale-110" viewBox="0 0 24 24" fill="currentColor">
+              <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.07 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0012 2z" />
+            </svg>
+            <span>Sign in with GitHub</span>
+            <span className="absolute inset-0 w-full h-full bg-zinc-950/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+          </a>
+
+          <div className="text-center pt-2 border-t border-zinc-100 flex flex-col gap-1.5">
+            <button 
+              onClick={() => setLoginView('plans')}
+              className="text-[9px] text-zinc-900 hover:underline font-bold"
+            >
+              Don't have an account? Choose a plan & Register
+            </button>
             <span className="text-[9px] text-zinc-400">Default Sandbox User: emma@agencyos.ai / password</span>
           </div>
         </div>
@@ -273,13 +576,13 @@ export default function AppShell() {
         <div className="p-4 border-t border-zinc-200/80 bg-zinc-50 space-y-2">
           <div className="flex items-center gap-2.5 p-2 rounded-lg border border-zinc-200 bg-white">
             <img 
-              src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" 
-              alt="Emma" 
+              src={currentUser.avatar} 
+              alt={currentUser.name} 
               className="w-8 h-8 rounded-full object-cover border border-zinc-200"
             />
             <div className="flex-1 min-w-0">
-              <p className="text-[11px] font-bold text-zinc-900 truncate leading-tight">Emma Stone</p>
-              <p className="text-[9px] text-zinc-400 truncate">Owner</p>
+              <p className="text-[11px] font-bold text-zinc-900 truncate leading-tight">{currentUser.name}</p>
+              <p className="text-[9px] text-zinc-400 truncate">{currentUser.role}</p>
             </div>
             <button 
               onClick={handleLogout}
@@ -512,9 +815,9 @@ export default function AppShell() {
                           </div>
                         ) : (
                           <img 
-                            src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" 
+                            src={currentUser.avatar} 
                             className="w-6 h-6 rounded-full object-cover shrink-0 border border-zinc-200"
-                            alt="Emma"
+                            alt={currentUser.name}
                           />
                         )}
                         <div 

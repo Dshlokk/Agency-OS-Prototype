@@ -1,4 +1,4 @@
-import { Lead, Client, Project, Task, Proposal, Strategy, Report, Comment, Notification, User, PipelineStage, TaskStatus, TaskPriority, AIConversation, Message, OnboardingChecklistItem, ProposalSection } from '../types/db';
+import { Lead, Client, Project, Task, Proposal, Strategy, Report, Comment, Notification, User, PipelineStage, TaskStatus, TaskPriority, AIConversation, Message, OnboardingChecklistItem, ProposalSection, Invoice, InvoiceItem } from '../types/db';
 
 // Simple helper to check if window is available
 const isClient = typeof window !== 'undefined';
@@ -7,505 +7,18 @@ const isClient = typeof window !== 'undefined';
 const DEFAULT_USERS: User[] = [
   { id: 'u1', name: 'Emma Stone', email: 'emma@agencyos.ai', role: 'owner', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150', productivityScore: 94, resourceUtilization: 85 },
   { id: 'u2', name: 'Liam Neeson', email: 'liam@agencyos.ai', role: 'team-member', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150', productivityScore: 88, resourceUtilization: 90 },
-  { id: 'u3', name: 'Sophia Loren', email: 'sophia@agencyos.ai', role: 'team-member', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150', productivityScore: 92, resourceUtilization: 72 },
-  { id: 'u4', name: 'Alice Vance', email: 'alice@quantumtech.io', role: 'client', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150' },
-  { id: 'u5', name: 'Marcus Brody', email: 'marcus@zenith.com', role: 'client', avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150' }
+  { id: 'u3', name: 'Sophia Loren', email: 'sophia@agencyos.ai', role: 'team-member', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150', productivityScore: 92, resourceUtilization: 72 }
 ];
 
-const DEFAULT_LEADS: Lead[] = [
-  {
-    id: 'l1',
-    name: 'John Doe',
-    companyName: 'Acme Corp',
-    email: 'john@acmecorp.com',
-    phone: '+1 (555) 123-4567',
-    website: 'acmecorp.com',
-    industry: 'SaaS',
-    revenueRange: '$1M - $5M',
-    socialLinks: { linkedin: 'https://linkedin.com/company/acmecorp', instagram: 'https://instagram.com/acme' },
-    leadSource: 'Google Search',
-    notes: 'Looking for a comprehensive SEO overhaul and Google Ads management. Frustrated with high CPC and low conversion rates on their current landing pages.',
-    stage: 'proposal-sent',
-    score: 85,
-    quality: 'High',
-    conversionProbability: 75,
-    suggestedServices: ['Technical SEO Audit', 'SEO Campaign (6 mo)', 'Google Ads Management'],
-    suggestedFollowUp: 'Send proposal revision with adjusted budget options by Friday.',
-    generatedMessage: `Hi John,
-
-I hope you're having a great week.
-
-Following up on our discovery call, I've prepared our comprehensive SEO and Ads growth proposal for Acme Corp. It targets reducing your CPC by 22% through refined ad mapping while scaling organic search authority.
-
-Please let me know your thoughts on the milestones. We can kick off as early as next Tuesday.
-
-Best,
-Emma`,
-    createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
-  },
-  {
-    id: 'l2',
-    name: 'Jane Smith',
-    companyName: 'Stellar Bakery',
-    email: 'jane@stellarbakery.com',
-    phone: '+1 (555) 987-6543',
-    website: 'stellarbakery.com',
-    industry: 'Food & Retail',
-    revenueRange: '$100k - $500k',
-    socialLinks: { instagram: 'https://instagram.com/stellarbakery', facebook: 'https://facebook.com/stellarbakery' },
-    leadSource: 'Instagram',
-    notes: 'Local bakery wanting to expand into nationwide e-commerce shipping. Needs social media branding, content calendar creation, and Shopify store optimization.',
-    stage: 'discovery',
-    score: 48,
-    quality: 'Medium',
-    conversionProbability: 40,
-    suggestedServices: ['Social Media Branding', 'Shopify Design & CRO', 'Email Marketing Setup'],
-    suggestedFollowUp: 'Schedule a 15-minute call to discuss national shipping logistics.',
-    generatedMessage: `Hi Jane,
-
-I love the brand you've built with Stellar Bakery! The engagement on your Instagram reels is fantastic.
-
-For scaling into national shipping, a key lever will be optimizing your Shopify checkout conversion rate and running hyper-local social ads to test ship-friendly locations.
-
-I've put together a few content pillars for your national launch. Let me know when you're free for a quick sync!
-
-Warmly,
-Emma`,
-    createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
-  },
-  {
-    id: 'l3',
-    name: 'Robert Johnson',
-    companyName: 'Delta Health Group',
-    email: 'r.johnson@deltahealth.com',
-    phone: '+1 (555) 333-8888',
-    website: 'deltahealthgroup.com',
-    industry: 'Healthcare',
-    revenueRange: '$5M - $10M',
-    socialLinks: { linkedin: 'https://linkedin.com/company/deltahealth' },
-    leadSource: 'LinkedIn Referral',
-    notes: 'Large healthcare provider needing HIPAA-compliant lead generation campaigns and local SEO for 5 new clinics. Decent budget but long corporate approval loop.',
-    stage: 'negotiation',
-    score: 92,
-    quality: 'High',
-    conversionProbability: 88,
-    suggestedServices: ['Local SEO Optimization', 'HIPAA-Compliant Lead Funnel', 'Reputation Management'],
-    suggestedFollowUp: 'Address the legal team\'s concerns regarding data tracking in the paid ad funnel.',
-    generatedMessage: `Hi Robert,
-
-Thank you for coordinating the call with your legal team yesterday.
-
-To confirm, all funnel interfaces and data collection forms we implement will use end-to-end encryption and sync directly with your HIPAA-compliant CRM (Salesforce Health Cloud) without storing sensitive health data in intermediary databases.
-
-I've updated section 8 of the agreement to reflect these security compliance measures. Looking forward to your approval.
-
-Best regards,
-Emma`,
-    createdAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
-  }
-];
-
-const DEFAULT_CLIENTS: Client[] = [
-  {
-    id: 'c1',
-    name: 'Alice Vance',
-    companyName: 'Quantum Tech',
-    email: 'alice@quantumtech.io',
-    phone: '+1 (555) 234-5678',
-    website: 'quantumtech.io',
-    industry: 'B2B SaaS',
-    revenueRange: '$3M - $8M',
-    socialLinks: { linkedin: 'https://linkedin.com/company/quantumtech' },
-    businessDescription: 'Quantum Tech provides cloud infrastructure monitoring software for developer-first companies. They want to drive trial signups via SEO, developer documentation optimization, and developer-targeted paid search ads.',
-    onboardingChecklist: [
-      { id: 'ob1', task: 'Kickoff call completed', completed: true },
-      { id: 'ob2', task: 'Google Analytics & GSC access shared', completed: true },
-      { id: 'ob3', task: 'Brand guidelines & logo assets uploaded', completed: true },
-      { id: 'ob4', task: 'Target developer persona workshop', completed: false },
-      { id: 'ob5', task: 'Set up reporting dashboard templates', completed: false }
-    ],
-    websiteAudit: {
-      seoScore: 78,
-      speedScore: 62,
-      mobileScore: 85,
-      uxScore: 70,
-      conversionScore: 55,
-      contentScore: 80,
-      details: 'Slow page load times on core landing pages (First Contentful Paint > 2.8s) due to heavy unoptimized script assets. Good structural HTML hierarchy, but lacking relevant semantic links and schema markup on product docs.'
-    },
-    socialAudit: {
-      frequency: '2 posts per month',
-      engagementRate: 0.8,
-      growthRate: 1.2,
-      consistency: 'Low',
-      details: 'LinkedIn channel is highly under-utilized. Brand voice is overly dry and corporate; could benefit from developer memes, tech-tip posts, and open-source contributions highlight.'
-    },
-    competitorAudit: {
-      competitors: ['Datadog', 'LogRocket', 'Dynatrace'],
-      positioning: 'Quantum Tech positions itself as the simple, lightweight alternative to enterprise bloat, yet their marketing feels heavy and enterprise-focused.',
-      opportunities: 'Create product comparison pages (e.g., "Quantum Tech vs Datadog") targeting high-intent search terms.'
-    },
-    deliverables: {
-      swot: {
-        strengths: ['Highly technical product with strong dev satisfaction', 'Clean, modern UI/UX in-app', 'Low churn rate for existing customers'],
-        weaknesses: ['Low organic web traffic', 'Long onboarding cycle', 'Poor search engine rankings for core terms'],
-        opportunities: ['SEO comparison pages targeting competitors', 'Developer advocacy program on Twitter/GitHub', 'Targeted interactive calculator tool for pricing transparency'],
-        threats: ['Aggressive budget spend by enterprise competitors', 'Feature replication by larger platforms']
-      },
-      growthOpportunities: [
-        'Build and rank comparison hubs targeting high-intent developer keywords.',
-        'Implement an interactive API Latency Calculator tool to capture organic leads.',
-        'Run targeted cold developer-relations outreach and retargeting ads.'
-      ],
-      recommendedServices: ['Technical & Content SEO Retainer', 'Developer Product Marketing', 'LinkedIn Thought Leadership'],
-      strategicRoadmap: [
-        'Month 1: Technical website fixes & speed optimization.',
-        'Month 2: Content production for 5 competitor comparison pages.',
-        'Month 3: Launch interactive pricing and latency calculator.',
-        'Month 4: Scale retargeting campaigns on LinkedIn & Twitter.'
-      ]
-    },
-    createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
-  },
-  {
-    id: 'c2',
-    name: 'Marcus Brody',
-    companyName: 'Zenith Apparel',
-    email: 'marcus@zenith.com',
-    phone: '+1 (555) 777-6666',
-    website: 'zenithapparel.com',
-    industry: 'E-commerce',
-    revenueRange: '$1M - $3M',
-    socialLinks: { instagram: 'https://instagram.com/zenithapparel', facebook: 'https://facebook.com/zenithapparel' },
-    businessDescription: 'Zenith Apparel sells sustainable, eco-friendly luxury activewear. They want to scale e-commerce sales using Meta ads, TikTok organic campaigns, and newsletter marketing.',
-    onboardingChecklist: [
-      { id: 'ob6', task: 'Kickoff call completed', completed: true },
-      { id: 'ob7', task: 'Shopify partner store access granted', completed: true },
-      { id: 'ob8', task: 'Meta Pixel & TikTok Pixel setup verified', completed: true },
-      { id: 'ob9', task: 'Access to creative brand folders shared', completed: true },
-      { id: 'ob10', task: 'Set up ad account budgets', completed: true }
-    ],
-    websiteAudit: {
-      seoScore: 68,
-      speedScore: 82,
-      mobileScore: 94,
-      uxScore: 88,
-      conversionScore: 64,
-      contentScore: 50,
-      details: 'Excellent mobile UX and site speeds. However, the store lacks basic e-commerce SEO (meta descriptions on product collections, alt text on images) and has high checkout abandonment.'
-    },
-    socialAudit: {
-      frequency: '5 posts per week',
-      engagementRate: 3.8,
-      growthRate: 8.5,
-      consistency: 'High',
-      details: 'Strong, visually stunning Instagram presence. Highly active, but lacks a structured marketing funnel (too many random posts, not enough clear calls to action or product linking).'
-    },
-    competitorAudit: {
-      competitors: ['Girlfriend Collective', 'Outdoor Voices', 'Lululemon'],
-      positioning: 'Zenith stands out for its extreme dedication to zero-waste packaging and 100% recycled nylon, but this message is buried on their product pages.',
-      opportunities: 'Launch a campaign called "Active for the Planet" highlighting the exact recycled bottle count per leggings pair.'
-    },
-    deliverables: {
-      swot: {
-        strengths: ['Highly visual product with strong aesthetic appeal', 'Eco-friendly and sustainable unique selling proposition', 'High repeat customer rate'],
-        weaknesses: ['Poor organic search rankings', 'High dependency on paid ads', 'No email lifecycle marketing'],
-        opportunities: ['Automated cart abandonment email flows', 'User-generated content (UGC) campaign on TikTok', 'SEO-driven sustainable lifestyle blog'],
-        threats: ['Fast-fashion copycats offering cheap alternatives', 'Rising customer acquisition costs (CAC) on Meta']
-      },
-      growthOpportunities: [
-        'Set up automated Klaviyo email flows (Welcome Series, Cart Abandonment, Post-Purchase).',
-        'Partner with micro-influencers on TikTok for high-volume UGC content.',
-        'Write collection-specific SEO content to capture "sustainable gym wear" searches.'
-      ],
-      recommendedServices: ['Meta & TikTok Paid Ads Management', 'Klaviyo Email Marketing Setup', 'SEO Content Retainer'],
-      strategicRoadmap: [
-        'Month 1: Klaviyo flow setup & Pixel audit.',
-        'Month 2: Launch Meta ad creatives (UGC focus) & influencer onboarding.',
-        'Month 3: Shopify conversion rate audit & theme optimization.',
-        'Month 4: Launch TikTok Shop integration and campaigns.'
-      ]
-    },
-    createdAt: new Date(Date.now() - 45 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
-  }
-];
-
-const DEFAULT_PROJECTS: Project[] = [
-  {
-    id: 'p1',
-    clientId: 'c1',
-    clientName: 'Quantum Tech',
-    name: 'Technical SEO & Content Hub',
-    status: 'active',
-    dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-    createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: 'p2',
-    clientId: 'c2',
-    clientName: 'Zenith Apparel',
-    name: 'Meta Ads Scale & Klaviyo Flow Setup',
-    status: 'active',
-    dueDate: new Date(Date.now() + 20 * 24 * 60 * 60 * 1000).toISOString(),
-    createdAt: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: 'p3',
-    clientId: 'c1',
-    clientName: 'Quantum Tech',
-    name: 'Competitor Comparison Hub Design',
-    status: 'delayed',
-    dueDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // Past due
-    createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date().toISOString()
-  }
-];
-
-const DEFAULT_TASKS: Task[] = [
-  {
-    id: 't1',
-    projectId: 'p1',
-    projectName: 'Technical SEO & Content Hub',
-    title: 'Fix website speed & optimize asset payloads',
-    description: 'Compress heavy images in the asset folder, defer non-critical Javascript, and configure service worker caching to bring mobile FCP down to < 1.8s.',
-    status: 'in-progress',
-    priority: 'high',
-    assigneeId: 'u2',
-    assigneeName: 'Liam Neeson',
-    dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString(),
-    delayPrediction: 'No delay predicted. Liam is on track based on historical commit cycles.',
-    createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: 't2',
-    projectId: 'p1',
-    projectName: 'Technical SEO & Content Hub',
-    title: 'Conduct semantic keyword research for dev persona',
-    description: 'Identify developer-intent search queries targeting light-weight APM, cloud logging cost optimization, and developer infrastructure monitoring tools.',
-    status: 'done',
-    priority: 'medium',
-    assigneeId: 'u3',
-    assigneeName: 'Sophia Loren',
-    dueDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
-  },
-  {
-    id: 't3',
-    projectId: 'p2',
-    projectName: 'Meta Ads Scale & Klaviyo Flow Setup',
-    title: 'Design and deploy Klaviyo Cart Abandonment flow',
-    description: 'Set up a high-converting, 3-step dynamic cart abandonment sequence featuring customer reviews, sustainability badges, and a 10% coupon code trigger.',
-    status: 'todo',
-    priority: 'high',
-    assigneeId: 'u3',
-    assigneeName: 'Sophia Loren',
-    dueDate: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString(),
-    delayPrediction: 'Potential 2-day delay: Sophia currently has 4 other active tasks due this week.',
-    createdAt: new Date(Date.now() - 25 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: 't4',
-    projectId: 'p3',
-    projectName: 'Competitor Comparison Hub Design',
-    title: 'Review landing page copy with client',
-    description: 'Walk through Quantum Tech vs Datadog page draft with Alice. Need final approval on product feature assertions before going to design.',
-    status: 'review',
-    priority: 'urgent',
-    assigneeId: 'u1',
-    assigneeName: 'Emma Stone',
-    dueDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    delayPrediction: 'Critical Delay: Client feedback is overdue by 3 days. Automated email reminder sent.',
-    createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: 't5',
-    projectId: 'p2',
-    projectName: 'Meta Ads Scale & Klaviyo Flow Setup',
-    title: 'Write ad copy for sustainable activewear campaign',
-    description: 'Write 3 different ad copy angles (Eco-friendly luxury, high-performance athletic, durability focus) with varying headlines for meta creatives.',
-    status: 'done',
-    priority: 'medium',
-    assigneeId: 'u1',
-    assigneeName: 'Emma Stone',
-    dueDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    createdAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
-  }
-];
-
-const DEFAULT_PROPOSALS: Proposal[] = [
-  {
-    id: 'prop1',
-    leadId: 'l1',
-    clientName: 'Acme Corp',
-    goals: 'Reduce Google Ads CPA by 25% and increase organic traffic by 40% over 6 months.',
-    servicesRequired: ['SEO Campaign Retainer', 'Google Ads Funnel Audit & Setup'],
-    budget: '$5,000 / month',
-    timeline: '6 Months',
-    pricingRecommendations: 'Retainer of $4,500/mo (SEO + Ads) + 10% of ad spend. Upsell opportunities identified: Landing Page Optimization package ($3,000 flat).',
-    upsellRecommendations: 'Add dynamic landing page testing package ($3,000 one-time) to boost paid traffic ROI.',
-    serviceRecommendations: ['Technical SEO Audit', 'SEO Campaign Retainer', 'Google Ads Setup', 'CRO Pack'],
-    profitabilityEstimation: 'Estimated cost of delivery: $2,100/mo. Gross margin: 53%. Direct net margin high due to automated reporting setups.',
-    status: 'sent',
-    sections: [
-      {
-        title: 'Executive Summary',
-        content: 'Acme Corp is positioned to capture high organic search volume for cloud monitoring services. By aligning strategic technical SEO with optimized Google Search ad configurations, we will drive high-intent visitors and slash acquisition costs.'
-      },
-      {
-        title: 'Business Challenges',
-        content: 'Current high CPC ($12.50 average) on broad search queries resulting in low-quality leads and poor conversion rates. Brand lacks visibility on crucial developer comparative queries.'
-      },
-      {
-        title: 'Proposed Solution',
-        content: '1. Build specific competitor comparison hubs to win high-intent search traffic.\n2. Overhaul paid search ad groups using negative keyword mapping and exact match setups.\n3. Implement conversion-centered design improvements on core landing pages.'
-      },
-      {
-        title: 'Deliverables & Pricing',
-        content: '• Technical SEO Retainer: $2,500 / month\n• Paid Search Ad Management: $2,000 / month (or 10% of spend, whichever is greater)\n• Optional Addon: CRO Landing Page Setup: $3,000 (one-time fee)'
-      }
-    ],
-    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()
-  }
-];
-
-const DEFAULT_STRATEGIES: Strategy[] = [
-  {
-    id: 'strat1',
-    clientId: 'c1',
-    clientName: 'Quantum Tech',
-    type: 'seo',
-    title: 'Developer SEO Growth Blueprint',
-    content: {
-      overview: 'Strategic organic SEO roadmap targeting developer-intent and competitor-specific search keywords.',
-      details: {
-        keywordOpportunities: [
-          { keyword: 'lightweight app monitoring', volume: 1800, difficulty: 'Medium', priority: 'High' },
-          { keyword: 'datadog pricing alternative', volume: 3400, difficulty: 'High', priority: 'High' },
-          { keyword: 'how to track cloud container latency', volume: 950, difficulty: 'Low', priority: 'Medium' }
-        ],
-        contentRoadmap: [
-          'Page 1: "Quantum Tech vs Datadog: The APM Comparison You Need"',
-          'Page 2: "Step-by-Step Guide: Optimizing Kubernetes Latency Overhead"',
-          'Page 3: "5 Open Source Infrastructure Monitoring Solutions vs Quantum"'
-        ],
-        technicalImprovements: [
-          'Decompress web asset payload size (currently 5.4MB) to improve Core Web Vitals.',
-          'Inject structured product schema JSON-LD on all comparison endpoints.',
-          'Resolve canonical loop redirect issues on documentation subdomains.'
-        ]
-      },
-      roadmap: [
-        'Week 1: Address top 3 site speed script blocks.',
-        'Week 3: Draft and review Datadog comparison hub copywriting.',
-        'Week 6: Launch first 2 container monitoring educational blogs.',
-        'Week 8: Conduct first backlink outreach program.'
-      ]
-    },
-    createdAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-    updatedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
-  }
-];
-
-const DEFAULT_REPORTS: Report[] = [
-  {
-    id: 'rep1',
-    clientId: 'c1',
-    clientName: 'Quantum Tech',
-    type: 'seo',
-    title: 'Organic Search Performance Report',
-    data: {
-      metrics: [
-        { label: 'Organic Traffic', value: '14,820', change: '+24.5%', isPositive: true },
-        { label: 'Avg Position', value: '14.2', change: '-3.1 ranks', isPositive: true },
-        { label: 'Lead Conversions', value: '284', change: '+12.8%', isPositive: true },
-        { label: 'Domain Authority', value: '42', change: '+2', isPositive: true }
-      ],
-      chartData: [
-        { name: 'Jan', traffic: 8200, conversions: 180 },
-        { name: 'Feb', traffic: 9800, conversions: 210 },
-        { name: 'Mar', traffic: 11400, conversions: 230 },
-        { name: 'Apr', traffic: 12100, conversions: 242 },
-        { name: 'May', traffic: 13500, conversions: 260 },
-        { name: 'Jun', traffic: 14820, conversions: 284 }
-      ]
-    },
-    executiveSummary: 'Quantum Tech saw strong organic search growth in June, fueled by the competitor comparison pages ranking for Datadog alternative searches. Technical performance optimization also reduced mobile page bounce rates by 12%.',
-    insights: [
-      'The Datadog comparison page accounts for 32% of all organic conversion completions this month.',
-      'Google mobile ranking queries rose by 14% following the FCP speed enhancements.'
-    ],
-    opportunities: [
-      'Write targeted comparison content for Dynatrace and LogRocket to duplicate this success.',
-      'Build out additional developer cheat sheets to capture low-difficulty search keywords.'
-    ],
-    nextSteps: [
-      'Begin copydrafting the Dynatrace comparison layout.',
-      'Initiate backlinks campaign for the newly launched latency tool.'
-    ],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: 'rep2',
-    clientId: 'c2',
-    clientName: 'Zenith Apparel',
-    type: 'paid',
-    title: 'Meta Ads Conversion Performance',
-    data: {
-      metrics: [
-        { label: 'ROAS', value: '3.42x', change: '+18.2%', isPositive: true },
-        { label: 'Total Purchase Value', value: '$48,220', change: '+32.4%', isPositive: true },
-        { label: 'Avg CTR', value: '2.14%', change: '+0.45%', isPositive: true },
-        { label: 'Cost Per Purchase', value: '$18.40', change: '-12.5%', isPositive: true }
-      ],
-      chartData: [
-        { name: 'Week 1', adSpend: 3200, sales: 8800 },
-        { name: 'Week 2', adSpend: 3500, sales: 11200 },
-        { name: 'Week 3', adSpend: 3800, sales: 13100 },
-        { name: 'Week 4', adSpend: 4000, sales: 15120 }
-      ]
-    },
-    executiveSummary: 'Paid ad scaling has exceeded expectations with ROAS hitting 3.42x. UGC creatives featuring our zero-waste packaging yielded the highest engagement rates and lowered CPA significantly.',
-    insights: [
-      'Video ad creatives highlighting green shipping practices convert 44% higher than model-only studio images.',
-      'Audience retargeting ad sets targeting checkout abandoners yielded a 5.8x ROAS.'
-    ],
-    opportunities: [
-      'Create 3 new hook variations for the zero-waste video packaging creatives.',
-      'Set up a custom audience targeting high-value repeat buyers (2+ purchases) with exclusive pre-releases.'
-    ],
-    nextSteps: [
-      'Brief creator network on recording UGC hooks focusing on zero-waste.',
-      'Launch Zenith VIP retargeting ad set.'
-    ],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }
-];
-
-const DEFAULT_COMMENTS: Comment[] = [
-  { id: 'com1', entityType: 'task', entityId: 't4', userId: 'u1', userName: 'Emma Stone', content: 'Hey @Alice Vance, just wanted to ping you here. Let me know if you had any questions on the product comparison angles. We would love to publish this next week.', createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() },
-  { id: 'com2', entityType: 'task', entityId: 't4', userId: 'u4', userName: 'Alice Vance', content: 'Hi Emma! Overall looks good. One detail: under datadog pricing comparison, please specify that their custom metrics model has added costs. Our legal team wants to make sure we make a clear distinction.', createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() }
-];
-
-const DEFAULT_NOTIFICATIONS: Notification[] = [
-  { id: 'n1', title: 'New Lead Generated', description: 'Acme Corp has completed the initial CRM intake form. AI score: 85/100.', read: false, createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
-  { id: 'n2', title: 'Task Delayed Warning', description: 'Task "Review landing page copy" is delayed. AI predicted impact: 4-day delay on project milestone.', read: false, createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() }
-];
-
+const DEFAULT_LEADS: Lead[] = [];
+const DEFAULT_CLIENTS: Client[] = [];
+const DEFAULT_PROJECTS: Project[] = [];
+const DEFAULT_TASKS: Task[] = [];
+const DEFAULT_PROPOSALS: Proposal[] = [];
+const DEFAULT_STRATEGIES: Strategy[] = [];
+const DEFAULT_REPORTS: Report[] = [];
+const DEFAULT_COMMENTS: Comment[] = [];
+const DEFAULT_NOTIFICATIONS: Notification[] = [];
 const DEFAULT_CONVERSATIONS: AIConversation[] = [
   {
     id: 'conv1',
@@ -515,6 +28,7 @@ const DEFAULT_CONVERSATIONS: AIConversation[] = [
     createdAt: new Date().toISOString()
   }
 ];
+const DEFAULT_INVOICES: Invoice[] = [];
 
 // In-memory Database state
 class MockDatabase {
@@ -529,6 +43,7 @@ class MockDatabase {
   private notifications: Notification[] = [];
   private conversations: AIConversation[] = [];
   private users: User[] = [];
+  private invoices: Invoice[] = [];
 
   constructor() {
     this.loadFromStorage();
@@ -536,6 +51,14 @@ class MockDatabase {
 
   private loadFromStorage() {
     if (isClient) {
+      const hasCleaned = localStorage.getItem('agencyos_cleaned_v2');
+      if (!hasCleaned) {
+        // Clear all old keys containing dummy data
+        const keysToClear = ['leads', 'clients', 'projects', 'tasks', 'proposals', 'strategies', 'reports', 'comments', 'notifications', 'conversations', 'users', 'invoices'];
+        keysToClear.forEach(key => localStorage.removeItem(`agencyos_${key}`));
+        localStorage.setItem('agencyos_cleaned_v2', 'true');
+      }
+
       const getStored = <T>(key: string, defaultValue: T): T => {
         const item = localStorage.getItem(`agencyos_${key}`);
         return item ? JSON.parse(item) : defaultValue;
@@ -552,6 +75,7 @@ class MockDatabase {
       this.notifications = getStored('notifications', DEFAULT_NOTIFICATIONS);
       this.conversations = getStored('conversations', DEFAULT_CONVERSATIONS);
       this.users = getStored('users', DEFAULT_USERS);
+      this.invoices = getStored('invoices', DEFAULT_INVOICES);
     } else {
       this.leads = [...DEFAULT_LEADS];
       this.clients = [...DEFAULT_CLIENTS];
@@ -564,6 +88,7 @@ class MockDatabase {
       this.notifications = [...DEFAULT_NOTIFICATIONS];
       this.conversations = [...DEFAULT_CONVERSATIONS];
       this.users = [...DEFAULT_USERS];
+      this.invoices = [...DEFAULT_INVOICES];
     }
   }
 
@@ -1109,6 +634,42 @@ class MockDatabase {
     this.saveToStorage('notifications', this.notifications);
   }
 
+  // Invoices
+  async getInvoices(): Promise<Invoice[]> {
+    return [...this.invoices];
+  }
+
+  async getInvoiceById(id: string): Promise<Invoice | undefined> {
+    return this.invoices.find(i => i.id === id);
+  }
+
+  async createInvoice(invoiceData: Omit<Invoice, 'id' | 'createdAt' | 'updatedAt'>): Promise<Invoice> {
+    const newInvoice: Invoice = {
+      ...invoiceData,
+      id: `inv_${Math.random().toString(36).substr(2, 9)}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    this.invoices.push(newInvoice);
+    this.saveToStorage('invoices', this.invoices);
+    return newInvoice;
+  }
+
+  async updateInvoice(updatedInvoice: Invoice): Promise<Invoice | undefined> {
+    const idx = this.invoices.findIndex(i => i.id === updatedInvoice.id);
+    if (idx === -1) return undefined;
+    this.invoices[idx] = { ...updatedInvoice, updatedAt: new Date().toISOString() };
+    this.saveToStorage('invoices', this.invoices);
+    return this.invoices[idx];
+  }
+
+  async deleteInvoice(id: string): Promise<boolean> {
+    const startLen = this.invoices.length;
+    this.invoices = this.invoices.filter(i => i.id !== id);
+    this.saveToStorage('invoices', this.invoices);
+    return this.invoices.length < startLen;
+  }
+
   // AI Assistant Conversations
   async getConversations(): Promise<AIConversation[]> {
     return [...this.conversations];
@@ -1136,61 +697,84 @@ class MockDatabase {
 - "Show delayed projects"
 - "Generate monthly report"`;
 
-    const normalizedContent = content.toLowerCase();
-    
-    if (normalizedContent.includes('lead') || normalizedContent.includes('convert')) {
+    const normalizedContent = content.toLowerCase();    if (normalizedContent.includes('lead') || normalizedContent.includes('convert')) {
       const sortedLeads = [...this.leads].sort((a, b) => b.score - a.score);
-      aiResponseText = `Based on our lead scoring models, here are your top leads sorted by conversion probability:
+      if (sortedLeads.length === 0) {
+        aiResponseText = "There are no leads currently registered in the database. Add some leads via the CRM pipeline to get AI predictions!";
+      } else {
+        aiResponseText = `Based on our lead scoring models, here are your top leads sorted by conversion probability:
       
-1. **${sortedLeads[0]?.companyName || 'Lead A'}** (${sortedLeads[0]?.name || ''}) - Score: **${sortedLeads[0]?.score || 0}**, Probability: **${sortedLeads[0]?.conversionProbability || 0}%** (Suggested Pitch: ${sortedLeads[0]?.suggestedServices.join(', ') || ''})
-2. **${sortedLeads[1]?.companyName || 'Lead B'}** (${sortedLeads[1]?.name || ''}) - Score: **${sortedLeads[1]?.score || 0}**, Probability: **${sortedLeads[1]?.conversionProbability || 0}%**
+1. **${sortedLeads[0].companyName}** (${sortedLeads[0].name}) - Score: **${sortedLeads[0].score}**, Probability: **${sortedLeads[0].conversionProbability}%** (Suggested Pitch: ${sortedLeads[0].suggestedServices.join(', ')})
+${sortedLeads[1] ? `2. **${sortedLeads[1].companyName}** (${sortedLeads[1].name}) - Score: **${sortedLeads[1].score}**, Probability: **${sortedLeads[1].conversionProbability}%**` : ''}
 
-*Action suggestion:* Click the "Move Stage" button in CRM and transition ${sortedLeads[0]?.companyName || 'them'} to 'Proposal Sent'. I've drafted a follow-up template for you in their profile.`;
+*Action suggestion:* Click the "Move Stage" button in CRM and transition ${sortedLeads[0].companyName} to 'Proposal Sent'. I've drafted a follow-up template for you in their profile.`;
+      }
     } 
     else if (normalizedContent.includes('proposal') || normalizedContent.includes('generate')) {
-      aiResponseText = `I have initialized a new Proposal Draft for Acme Corp.
+      const firstLead = this.leads[0];
+      if (!firstLead) {
+        aiResponseText = "To generate a proposal, please make sure you have at least one lead in the CRM pipeline.";
+      } else {
+        aiResponseText = `I have initialized a new Proposal Draft for **${firstLead.companyName}**.
       
 - **Recommended Retainer**: $4,500 / month
 - **Gross Profit Margin**: 55%
-- **Upsell Recommendation**: Included CRO landing pages add-on ($3,000 one-time)
 - **Status**: Draft created.
 
-*Action suggestion:* Go to the **CRM** section, open **Acme Corp**, and click **View Proposal** to review and send the generated PDF document.`;
+*Action suggestion:* Go to the **CRM** section, open **${firstLead.companyName}**, and click **View Proposal** to review and send the generated document.`;
+      }
     } 
     else if (normalizedContent.includes('seo strategy') || normalizedContent.includes('strategy')) {
-      aiResponseText = `I've compiled a **Developer SEO Growth Blueprint** for Quantum Tech.
+      const firstClient = this.clients[0];
+      if (!firstClient) {
+        aiResponseText = "No clients found. Please add or convert a lead to a client first to build an SEO strategy.";
+      } else {
+        aiResponseText = `I've compiled an **SEO Growth Blueprint** for **${firstClient.companyName}**.
 
 **Core Keywords to Capture:**
-- *datadog pricing alternative* (3.4k monthly searches, High intent)
-- *lightweight app monitoring* (1.8k monthly searches, Med intent)
+- *high-intent search terms* tailored to ${firstClient.industry}
+- *comparison page keywords*
 
 **Technical Recommendations:**
-- Optimize image assets payload (FCP takes >2.8s)
-- Create canonical and product comparison endpoints.
+- Optimize page speed performance indicators.
+- Create canonical SEO page structures.
 
-*Action suggestion:* Navigate to **Clients** -> **Quantum Tech** -> **Strategies** to view the full roadmap.`;
+*Action suggestion:* Navigate to **Clients** -> **${firstClient.companyName}** -> **Strategies** to view the full roadmap.`;
+      }
     } 
     else if (normalizedContent.includes('delayed') || normalizedContent.includes('project')) {
       const delayed = this.projects.filter(p => p.status === 'delayed');
-      aiResponseText = `I detected **${delayed.length} delayed project(s)**:
+      if (delayed.length === 0) {
+        aiResponseText = "Outstanding! All current client projects are currently on track and meeting milestones.";
+      } else {
+        aiResponseText = `I detected **${delayed.length} delayed project(s)**:
 
-1. **${delayed[0]?.name || 'Competitor Comparison Hub Design'}** (Client: ${delayed[0]?.clientName || 'Quantum Tech'})
-   - *AI Delay Prediction:* Critical Delay. Client assets feedback is overdue by 3 days. Emma Stone has sent automated follow-up messages.
+1. **${delayed[0].name}** (Client: ${delayed[0].clientName})
+   - *AI Delay Prediction:* Project milestone delay predicted. Review assignee workload.
 
-*Action suggestion:* Go to **Projects** -> **List View** to filter delayed tasks and ping Emma Stone or send a portal nudge to Alice Vance.`;
+*Action suggestion:* Go to **Projects** -> **List View** to filter delayed tasks and coordinate with the team assignee.`;
+      }
     }
     else if (normalizedContent.includes('report') || normalizedContent.includes('monthly')) {
-      aiResponseText = `I've compiled the monthly performance reports:
+      if (this.reports.length === 0) {
+        aiResponseText = "No reports generated yet. Create a report in the Reports dashboard tab to get started!";
+      } else {
+        aiResponseText = `I've compiled the monthly performance reports:
 
-- **SEO organic rankings** for Quantum Tech grew by **24.5%** in traffic (conversions: +12.8%).
-- **Meta Ads ROAS** for Zenith Apparel hit **3.42x** ($48k purchase value generated).
+${this.reports.map((r, i) => `${i + 1}. **${r.title}** for ${r.clientName} (${r.type.toUpperCase()})`).join('\n')}
 
-*Action suggestion:* Navigate to **Reports** to view dashboard metrics. You can export these reports directly as a PDF.`;
+*Action suggestion:* Navigate to **Reports** to view metrics and export summaries.`;
+      }
     }
     else if (normalizedContent.includes('growth potential') || normalizedContent.includes('potential')) {
-      aiResponseText = `Based on organic performance analytics, **Quantum Tech** shows the highest immediate growth potential. 
+      const firstClient = this.clients[0];
+      if (!firstClient) {
+        aiResponseText = "Please register active clients in the database to run growth capability analysis.";
+      } else {
+        aiResponseText = `Based on organic performance analytics, **${firstClient.companyName}** shows high immediate growth potential. 
 
-By scaling comparison layout campaigns (converting at a high 12.8% benchmark) and optimizing site speeds, we can expect organic inbound leads to grow by **35%** next month.`;
+We recommend implementing localized comparison listings and page speed optimizations to grow organic inbound queries next month.`;
+      }
     }
 
     const aiMsg: Message = {

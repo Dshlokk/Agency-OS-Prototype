@@ -1,0 +1,8 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+# Netlify Essential Next.js Plugin is automatically installed on build,
+# but we can declare it here to ensure proper App Router handling.
+[[plugins]]
+  package = "@netlify/plugin-nextjs"

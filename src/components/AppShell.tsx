@@ -15,7 +15,6 @@ import {
   Sparkles, 
   ChevronRight,
   UserCheck,
-  LogOut,
   Lock,
   Mail,
   Sun,
@@ -62,7 +61,7 @@ export default function AppShell() {
   }, [darkMode]);
 
   // Authentication State
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
   const [currentUser, setCurrentUser] = useState<{ name: string; email: string; avatar: string; role: string }>({
     name: 'Emma Stone',
     email: 'emma@agencyos.ai',
@@ -166,24 +165,7 @@ export default function AppShell() {
     }
   };
 
-  const handleLogout = async () => {
-    setIsAuthenticated(false);
-    setCurrentUser({
-      name: 'Emma Stone',
-      email: 'emma@agencyos.ai',
-      avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
-      role: 'Owner'
-    });
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('agencyos_session');
-      localStorage.removeItem('agencyos_user');
-    }
-    try {
-      await fetch('/api/auth/logout', { method: 'POST' });
-    } catch (e) {
-      console.error('Failed to log out via API:', e);
-    }
-  };
+
 
   const handleNotificationRead = async () => {
     await mockDb.markAllNotificationsAsRead();
@@ -538,7 +520,7 @@ export default function AppShell() {
               onClick={() => setLoginView('plans')}
               className="text-[9px] text-zinc-900 hover:underline font-bold"
             >
-              Don't have an account? Choose a plan & Register
+              Don&apos;t have an account? Choose a plan &amp; Register
             </button>
             <span className="text-[9px] text-zinc-400">Default Sandbox User: emma@agencyos.ai / password</span>
           </div>
@@ -603,13 +585,7 @@ export default function AppShell() {
               <p className="text-[11px] font-bold text-zinc-900 truncate leading-tight">{currentUser.name}</p>
               <p className="text-[9px] text-zinc-400 truncate">{currentUser.role}</p>
             </div>
-            <button 
-              onClick={handleLogout}
-              title="Log Out"
-              className="p-1 rounded text-zinc-400 hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-            </button>
+
           </div>
         </div>
       </aside>
@@ -641,12 +617,7 @@ export default function AppShell() {
               )}
             </button>
           </div>
-          <button 
-            onClick={handleLogout}
-            className="p-1.5 rounded-lg text-zinc-500 hover:text-rose-600 bg-white border border-zinc-200"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
+
           <button 
             onClick={() => setIsAssistantOpen(true)}
             className="p-1.5 rounded-lg text-zinc-900 bg-zinc-100 border border-zinc-200"

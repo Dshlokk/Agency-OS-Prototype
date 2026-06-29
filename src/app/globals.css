@@ -22,6 +22,41 @@
   --ring: #a1a1aa;
 }
 
+.dark {
+  --background: #09090b;
+  --foreground: #f4f4f5;
+  --card: #18181b;
+  --card-foreground: #fafafa;
+  --popover: #18181b;
+  --popover-foreground: #fafafa;
+  --primary: #ffffff;
+  --primary-foreground: #09090b;
+  --secondary: #27272a;
+  --secondary-foreground: #fafafa;
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+  --accent: #ffffff;
+  --accent-foreground: #09090b;
+  --border: #27272a;
+  --input: #27272a;
+  --ring: #71717a;
+
+  /* Tailwind CSS v4 Color overrides for dark mode */
+  --color-white: #09090b;
+  --color-zinc-50: #121214;
+  --color-zinc-100: #1c1c1f;
+  --color-zinc-200: #27272a;
+  --color-zinc-300: #3f3f46;
+  --color-zinc-400: #52525b;
+  --color-zinc-500: #71717a;
+  --color-zinc-650: #a1a1aa;
+  --color-zinc-600: #a1a1aa;
+  --color-zinc-700: #d4d4d8;
+  --color-zinc-800: #e4e4e7;
+  --color-zinc-900: #f4f4f5;
+  --color-zinc-950: #ffffff;
+}
+
 body {
   background-color: var(--background);
   color: var(--foreground);
@@ -133,4 +168,43 @@ button {
     height: 100vh;
     padding-bottom: 64px;
   }
+}
+
+/* Custom dark mode rules for specific components */
+.dark .glass-panel {
+  background: rgba(9, 9, 11, 0.85);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.dark .glass-card {
+  background: #18181b;
+  border-color: #27272a;
+}
+
+.dark .glass-card:hover {
+  background: #1c1c1f;
+  border-color: #3f3f46;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.dark input, .dark select, .dark textarea {
+  background-color: #121214;
+  border-color: #27272a;
+  color: #f4f4f5;
+}
+
+.dark input:focus, .dark select:focus, .dark textarea:focus {
+  border-color: #ffffff;
+  background-color: #121214;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.08);
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.01);
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
 }

@@ -17,7 +17,9 @@ import {
   UserCheck,
   LogOut,
   Lock,
-  Mail
+  Mail,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import mockDb from '../lib/services/db';
@@ -41,6 +43,23 @@ export default function AppShell() {
   const [chatInput, setChatInput] = useState<string>('');
   const [isAiTyping, setIsAiTyping] = useState<boolean>(false);
   const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
+
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('theme') === 'dark' || document.documentElement.classList.contains('dark');
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [darkMode]);
 
   // Authentication State
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -604,6 +623,13 @@ export default function AppShell() {
           <span className="font-bold text-sm text-zinc-900">AgencyOS</span>
         </div>
         <div className="flex items-center gap-3">
+          <button 
+            onClick={() => setDarkMode(!darkMode)}
+            className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-900 bg-white border border-zinc-200"
+            title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          >
+            {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
           <div className="relative">
             <button 
               onClick={() => setShowNotifications(!showNotifications)}
@@ -650,6 +676,15 @@ export default function AppShell() {
                 Target ROAS: <strong>3.5x</strong>
               </span>
             </div>
+
+            {/* Dark Mode Toggle */}
+            <button
+              onClick={() => setDarkMode(!darkMode)}
+              className="p-2 rounded-lg text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 border border-zinc-200 transition-colors"
+              title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
 
             {/* Notification Dropdown */}
             <div className="relative">

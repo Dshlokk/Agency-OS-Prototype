@@ -295,25 +295,34 @@ export default function ClientsView({ refreshTrigger, triggerRefresh }: ClientsV
       // Set presentation properties
       pptx.layout = 'LAYOUT_16x9';
 
-      // Slide 1: Cover (Premium Dark Mode)
+      const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+
+      // Slide 1: Cover (Premium Dark Mode with Nanobanana BG)
       const slide1 = pptx.addSlide();
-      slide1.background = { fill: '09090B' };
+      slide1.background = { path: origin + '/nanobanana_pitchdeck_bg.jpg' };
+      
+      // Logo badge on Cover
+      slide1.addImage({
+        path: origin + '/nanobanana_logo.jpg',
+        x: 11.5, y: 0.5, w: 1.2, h: 1.2
+      });
+
       // Accent sidebar bar on left
-      slide1.addShape('rect', { x: 0, y: 0, w: 0.3, h: '100%', fill: { color: '6366F1' } });
+      slide1.addShape('rect', { x: 0, y: 0, w: 0.3, h: '100%', fill: { color: 'F59E0B' } });
       // Title content
       slide1.addText('GROWTH PITCH DECK', {
         x: 1.2, y: 2.0, w: 8.0, h: 0.4,
-        fontSize: 13, bold: true, color: '6366F1', fontFace: 'Trebuchet MS'
+        fontSize: 13, bold: true, color: 'F59E0B', fontFace: 'Trebuchet MS'
       });
       slide1.addText(`Campaign Proposal for\n${prop.clientName}`, {
         x: 1.2, y: 2.5, w: 11.0, h: 2.0,
         fontSize: 40, bold: true, color: 'FFFFFF', fontFace: 'Trebuchet MS', lineSpacing: 10
       });
-      slide1.addText('Target metrics, challenges, and retainer roadmap overview', {
+      slide1.addText('Target metrics, challenges, and retainer roadmap overview (Nanobanana Edition)', {
         x: 1.2, y: 4.8, w: 10.0, h: 0.6,
         fontSize: 15, color: 'A1A1AA', fontFace: 'Trebuchet MS'
       });
-      slide1.addText('AgencyOS AI Operating System | Slide 1 of 5', {
+      slide1.addText('AgencyOS AI Operating System & Nanobanana Engine | Slide 1 of 5', {
         x: 1.2, y: 6.2, w: 11.0, h: 0.4,
         fontSize: 10, color: '71717A', fontFace: 'Trebuchet MS'
       });
@@ -321,8 +330,10 @@ export default function ClientsView({ refreshTrigger, triggerRefresh }: ClientsV
       // Slide 2: Goals (Light Mode Card Layout)
       const slide2 = pptx.addSlide();
       slide2.background = { fill: 'FAFAFA' };
+      // Logo on slide
+      slide2.addImage({ path: origin + '/nanobanana_logo.jpg', x: 12.0, y: 0.5, w: 0.6, h: 0.6 });
       // Vertical accent bar next to title
-      slide2.addShape('rect', { x: 0.9, y: 0.7, w: 0.05, h: 0.4, fill: { color: '6366F1' } });
+      slide2.addShape('rect', { x: 0.9, y: 0.7, w: 0.05, h: 0.4, fill: { color: 'F59E0B' } });
       slide2.addText('01 / CORE GOALS', { x: 1.1, y: 0.7, w: 11.0, h: 0.4, fontSize: 11, bold: true, color: '71717A', fontFace: 'Trebuchet MS' });
       slide2.addText('Client Growth Intent', { x: 1.1, y: 1.1, w: 11.0, h: 0.7, fontSize: 26, bold: true, color: '09090B', fontFace: 'Trebuchet MS' });
       
@@ -334,6 +345,8 @@ export default function ClientsView({ refreshTrigger, triggerRefresh }: ClientsV
       // Slide 3: Challenges (Two-Column Side-by-Side Cards)
       const slide3 = pptx.addSlide();
       slide3.background = { fill: 'FAFAFA' };
+      // Logo on slide
+      slide3.addImage({ path: origin + '/nanobanana_logo.jpg', x: 12.0, y: 0.5, w: 0.6, h: 0.6 });
       slide3.addShape('rect', { x: 0.9, y: 0.7, w: 0.05, h: 0.4, fill: { color: 'EF4444' } }); // Red accent for risk
       slide3.addText('02 / AUDIT CONCERNS', { x: 1.1, y: 0.7, w: 11.0, h: 0.4, fontSize: 11, bold: true, color: '71717A', fontFace: 'Trebuchet MS' });
       slide3.addText('Core Business Obstacles', { x: 1.1, y: 1.1, w: 11.0, h: 0.7, fontSize: 26, bold: true, color: '09090B', fontFace: 'Trebuchet MS' });
@@ -352,6 +365,8 @@ export default function ClientsView({ refreshTrigger, triggerRefresh }: ClientsV
       // Slide 4: Strategy (Two-Column Side-by-Side Cards)
       const slide4 = pptx.addSlide();
       slide4.background = { fill: 'FAFAFA' };
+      // Logo on slide
+      slide4.addImage({ path: origin + '/nanobanana_logo.jpg', x: 12.0, y: 0.5, w: 0.6, h: 0.6 });
       slide4.addShape('rect', { x: 0.9, y: 0.7, w: 0.05, h: 0.4, fill: { color: '10B981' } }); // Green accent for growth
       slide4.addText('03 / STRATEGY RETAINER', { x: 1.1, y: 0.7, w: 11.0, h: 0.4, fontSize: 11, bold: true, color: '71717A', fontFace: 'Trebuchet MS' });
       slide4.addText('Proposed Solutions Retainer', { x: 1.1, y: 1.1, w: 11.0, h: 0.7, fontSize: 26, bold: true, color: '09090B', fontFace: 'Trebuchet MS' });
@@ -371,14 +386,16 @@ export default function ClientsView({ refreshTrigger, triggerRefresh }: ClientsV
       // Slide 5: Investment (High Contrast Price Card on Left)
       const slide5 = pptx.addSlide();
       slide5.background = { fill: 'FAFAFA' };
-      slide5.addShape('rect', { x: 0.9, y: 0.7, w: 0.05, h: 0.4, fill: { color: '6366F1' } });
+      // Logo on slide
+      slide5.addImage({ path: origin + '/nanobanana_logo.jpg', x: 12.0, y: 0.5, w: 0.6, h: 0.6 });
+      slide5.addShape('rect', { x: 0.9, y: 0.7, w: 0.05, h: 0.4, fill: { color: 'F59E0B' } });
       slide5.addText('04 / RETAINER INVESTMENT', { x: 1.1, y: 0.7, w: 11.0, h: 0.4, fontSize: 11, bold: true, color: '71717A', fontFace: 'Trebuchet MS' });
       slide5.addText('Committed Retainer Scope', { x: 1.1, y: 1.1, w: 11.0, h: 0.7, fontSize: 26, bold: true, color: '09090B', fontFace: 'Trebuchet MS' });
       
       // Left Panel (Dark visual price card)
       slide5.addShape('roundRect', { x: 0.9, y: 2.0, w: 5.5, h: 3.7, fill: { color: '09090B' } });
       slide5.addText('ESTIMATED BUDGET RETAINER', { x: 1.2, y: 2.3, w: 4.9, h: 0.4, fontSize: 11, bold: true, color: 'A1A1AA', fontFace: 'Trebuchet MS' });
-      slide5.addText(prop.budget, { x: 1.2, y: 2.7, w: 4.9, h: 1.0, fontSize: 32, bold: true, color: '6366F1', fontFace: 'Trebuchet MS' });
+      slide5.addText(prop.budget, { x: 1.2, y: 2.7, w: 4.9, h: 1.0, fontSize: 32, bold: true, color: 'F59E0B', fontFace: 'Trebuchet MS' });
       slide5.addText(`Committed Timeline: ${prop.timeline}`, { x: 1.2, y: 3.7, w: 4.9, h: 0.5, fontSize: 14, color: 'FFFFFF', fontFace: 'Trebuchet MS' });
       slide5.addText('*Invoiced monthly. All prices in USD.', { x: 1.2, y: 4.7, w: 4.9, h: 0.4, fontSize: 10, color: '71717A', fontFace: 'Trebuchet MS' });
 
@@ -474,11 +491,11 @@ export default function ClientsView({ refreshTrigger, triggerRefresh }: ClientsV
               font-weight: 700;
               text-transform: uppercase;
               letter-spacing: 0.15em;
-              color: #6366f1;
+              color: #f59e0b;
               margin-bottom: 16px;
             }
             .slide-dark .tag {
-              color: #818cf8;
+              color: #fbbf24;
             }
             .card-grid {
               display: grid;
@@ -501,7 +518,7 @@ export default function ClientsView({ refreshTrigger, triggerRefresh }: ClientsV
               left: 0;
               right: 0;
               height: 4px;
-              background: #6366f1;
+              background: #f59e0b;
               border-radius: 12px 12px 0 0;
             }
             .card-red::before {
@@ -551,7 +568,7 @@ export default function ClientsView({ refreshTrigger, triggerRefresh }: ClientsV
             .pricing-value {
               font-size: 36px;
               font-weight: 800;
-              color: #6366f1;
+              color: #fbbf24;
               margin-bottom: 10px;
             }
             .pricing-timeline {
@@ -571,19 +588,20 @@ export default function ClientsView({ refreshTrigger, triggerRefresh }: ClientsV
         </head>
         <body>
           <!-- Slide 1: Cover -->
-          <div class="slide slide-dark">
-            <div style="position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: #6366f1;"></div>
-            <span class="tag">Growth Pitch Deck</span>
-            <h1 style="margin-top: 40px; font-size: 52px;">Strategic Campaign Retainer Proposal</h1>
-            <p style="color: #a1a1aa; font-size: 18px; margin-bottom: 40px;">Prepared for the team at <strong>${prop.clientName}</strong></p>
+          <div class="slide slide-dark" style="background-image: linear-gradient(to right, rgba(9,9,11,0.95) 45%, rgba(9,9,11,0.4) 100%), url('${window.location.origin}/nanobanana_pitchdeck_bg.jpg'); background-size: cover; background-position: center; border-left: 6px solid #fbbf24;">
+            <img src="${window.location.origin}/nanobanana_logo.jpg" style="position: absolute; top: 25mm; right: 25mm; width: 64px; height: 64px; border-radius: 14px; border: 2px solid #fbbf24; box-shadow: 0 4px 20px rgba(251,191,36,0.35);" />
+            <span class="tag">Growth Pitch Deck &bull; Nanobanana Edition</span>
+            <h1 style="margin-top: 40px; font-size: 52px; text-shadow: 0 2px 10px rgba(0,0,0,0.5);">Strategic Campaign Retainer Proposal</h1>
+            <p style="color: #e4e4e7; font-size: 18px; margin-bottom: 40px; text-shadow: 0 2px 5px rgba(0,0,0,0.5);">Prepared for the team at <strong>${prop.clientName}</strong></p>
             <div class="slide-footer">
-              <span>AgencyOS AI Operating System</span>
+              <span>AgencyOS AI Operating System & Nanobanana Engine</span>
               <span>Slide 1 of 5</span>
             </div>
           </div>
 
           <!-- Slide 2: Target Goals -->
           <div class="slide">
+            <img src="${window.location.origin}/nanobanana_logo.jpg" style="position: absolute; top: 25mm; right: 25mm; width: 44px; height: 44px; border-radius: 8px; border: 1px solid #e4e4e7;" />
             <span class="tag">01 / Goals</span>
             <h2>Client Growth Intent</h2>
             <div class="card" style="margin-top: 10px; padding: 35px; min-height: 250px;">
@@ -598,6 +616,7 @@ export default function ClientsView({ refreshTrigger, triggerRefresh }: ClientsV
 
           <!-- Slide 3: Challenges -->
           <div class="slide">
+            <img src="${window.location.origin}/nanobanana_logo.jpg" style="position: absolute; top: 25mm; right: 25mm; width: 44px; height: 44px; border-radius: 8px; border: 1px solid #e4e4e7;" />
             <span class="tag">02 / System Audit Concerns</span>
             <h2>Core Business Obstacles</h2>
             <div class="card-grid">
@@ -618,6 +637,7 @@ export default function ClientsView({ refreshTrigger, triggerRefresh }: ClientsV
 
           <!-- Slide 4: Proposed Solution -->
           <div class="slide">
+            <img src="${window.location.origin}/nanobanana_logo.jpg" style="position: absolute; top: 25mm; right: 25mm; width: 44px; height: 44px; border-radius: 8px; border: 1px solid #e4e4e7;" />
             <span class="tag">03 / Strategy Retainer</span>
             <h2>Strategic Marketing Scope</h2>
             <div class="card-grid">
@@ -640,6 +660,7 @@ export default function ClientsView({ refreshTrigger, triggerRefresh }: ClientsV
 
           <!-- Slide 5: Investment scope -->
           <div class="slide">
+            <img src="${window.location.origin}/nanobanana_logo.jpg" style="position: absolute; top: 25mm; right: 25mm; width: 44px; height: 44px; border-radius: 8px; border: 1px solid #e4e4e7;" />
             <span class="tag">04 / Budget Investment</span>
             <h2>Proposed Engagement Terms</h2>
             <div class="card-grid">
@@ -1214,8 +1235,8 @@ export default function ClientsView({ refreshTrigger, triggerRefresh }: ClientsV
               font-size: 11px;
               text-transform: uppercase;
               letter-spacing: 1px;
-              color: #71717a;
-              border-bottom: 1px solid #e4e4e7;
+              color: #854d0e;
+              border-bottom: 1px solid #fef08a;
               padding-bottom: 5px;
               margin: 0 0 10px 0;
             }
@@ -1235,14 +1256,15 @@ export default function ClientsView({ refreshTrigger, triggerRefresh }: ClientsV
               margin-bottom: 30px;
             }
             table.items-table th {
-              background-color: #f4f4f5;
-              font-weight: 600;
+              background-color: #fffbeb;
+              color: #854d0e;
+              font-weight: 700;
               text-align: left;
               padding: 10px 12px;
               font-size: 11px;
               text-transform: uppercase;
               letter-spacing: 0.5px;
-              border-bottom: 1px solid #e4e4e7;
+              border-bottom: 2px solid #fef08a;
             }
             table.items-table td {
               padding: 12px;
@@ -1270,16 +1292,16 @@ export default function ClientsView({ refreshTrigger, triggerRefresh }: ClientsV
               font-weight: 600;
             }
             .totals-table tr.grand-total {
-              border-top: 2px solid #e4e4e7;
+              border-top: 2px solid #eab308;
               font-size: 16px;
             }
             .totals-table tr.grand-total td {
               padding-top: 12px;
-              color: #09090b;
+              color: #854d0e;
               font-weight: 800;
             }
             .notes-section {
-              border-top: 1px dashed #e4e4e7;
+              border-top: 1px dashed #eab308;
               padding-top: 20px;
             }
             .notes-section h4 {
@@ -1287,7 +1309,7 @@ export default function ClientsView({ refreshTrigger, triggerRefresh }: ClientsV
               font-size: 11px;
               text-transform: uppercase;
               letter-spacing: 0.5px;
-              color: #71717a;
+              color: #854d0e;
             }
             .notes-section p {
               margin: 0;
@@ -1295,9 +1317,10 @@ export default function ClientsView({ refreshTrigger, triggerRefresh }: ClientsV
               font-style: italic;
             }
             .badge-paid {
-              color: #16a34a;
+              color: #854d0e;
+              background-color: #fef9c3;
               font-weight: bold;
-              border: 1px solid #16a34a;
+              border: 1px solid #eab308;
               padding: 2px 6px;
               border-radius: 4px;
               text-transform: uppercase;
@@ -1305,9 +1328,10 @@ export default function ClientsView({ refreshTrigger, triggerRefresh }: ClientsV
               display: inline-block;
             }
             .badge-sent {
-              color: #2563eb;
+              color: #71717a;
+              background-color: #f4f4f5;
               font-weight: bold;
-              border: 1px solid #2563eb;
+              border: 1px solid #d4d4d8;
               padding: 2px 6px;
               border-radius: 4px;
               text-transform: uppercase;
@@ -1322,11 +1346,17 @@ export default function ClientsView({ refreshTrigger, triggerRefresh }: ClientsV
         </head>
         <body>
           <!-- Header Layout Table -->
-          <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; border-bottom: 2px solid #e4e4e7; padding-bottom: 20px;">
+          <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; border-bottom: 3px solid #eab308; padding-bottom: 20px;">
             <tr>
               <td style="vertical-align: top; text-align: left; padding-bottom: 20px;">
-                <h1 style="font-size: 24px; font-weight: 800; color: #09090b; margin: 0 0 5px 0; letter-spacing: -0.5px;">\${ownerSettings.companyName}</h1>
-                <p style="margin: 0; color: #71717a;">\${ownerSettings.ownerName} &bull; \${ownerSettings.designation}</p>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                  <img src="${window.location.origin}/nanobanana_logo.jpg" style="height: 60px; width: 60px; object-fit: cover; border-radius: 12px; border: 2px solid #eab308; box-shadow: 0 4px 12px rgba(234,179,8,0.15);" />
+                  <div>
+                    <h1 style="font-size: 24px; font-weight: 800; color: #09090b; margin: 0 0 3px 0; letter-spacing: -0.5px;">\${ownerSettings.companyName}</h1>
+                    <p style="margin: 0; color: #71717a; font-size: 12px;">\${ownerSettings.ownerName} &bull; \${ownerSettings.designation}</p>
+                    <p style="margin: 3px 0 0 0; color: #eab308; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">Nanobanana Premium Design Edition</p>
+                  </div>
+                </div>
               </td>
               <td style="vertical-align: top; text-align: right; padding-bottom: 20px;">
                 <h2 style="font-size: 28px; font-weight: 300; color: #71717a; margin: 0 0 10px 0; letter-spacing: 1px;">INVOICE</h2>
